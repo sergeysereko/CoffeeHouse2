@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface ScheduleDao extends CRUDInterface<Schedule> {
     public List<Schedule> findScheduleByDay(String dayOfWeek);
+
+    public List<Schedule> findScheduleForBaristaByWeek(int staffId);
+
+    public List<Schedule> findScheduleForWeek();
 }

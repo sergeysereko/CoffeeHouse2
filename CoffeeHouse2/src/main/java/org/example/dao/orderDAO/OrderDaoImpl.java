@@ -1,13 +1,12 @@
 package org.example.dao.orderDAO;
-
-import org.example.dao.CRUDInterface;
+import org.example.model.Customer;
 import org.example.model.Order;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 public class OrderDaoImpl implements OrderDao {
@@ -188,5 +187,89 @@ public class OrderDaoImpl implements OrderDao {
         }
         return orders;
     }
+
+    @Override
+    public List<Order> findOrdersByDate(Date date) {
+        List<Order> orders = new ArrayList<>();
+        String query = "SELECT * FROM orders WHERE order_date = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setDate(1, date);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Order order = new Order();
+                    order.setId(resultSet.getInt("id"));
+                    order.setCustomerId(resultSet.getInt("customer_id"));
+                    order.setWaiterId(resultSet.getInt("waiter_id"));
+                    order.setOrderDate(resultSet.getDate("order_date"));
+                    order.setTotalAmount(resultSet.getDouble("total_amount"));
+                    orders.add(order);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    @Override
+    public List<Order> findOrdersBetweenDates(Date startDate, Date endDate) {
+        List<Order> orders = new ArrayList<>();
+        String query = "SELECT * FROM orders WHERE order_date BETWEEN ? AND ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setDate(1, new java.sql.Date(startDate.getTime()));
+            preparedStatement.setDate(2, new java.sql.Date(endDate.getTime()));
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Order order = new Order();
+                    order.setId(resultSet.getInt("id"));
+                    order.setCustomerId(resultSet.getInt("customer_id"));
+                    order.setWaiterId(resultSet.getInt("waiter_id"));
+                    order.setOrderDate(resultSet.getDate("order_date"));
+                    order.setTotalAmount(resultSet.getDouble("total_amount"));
+                    orders.add(order);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    @Override
+    public double averageOrderAmountByDate(Date date) {
+        double averageAmount = 0.0;
+        String query = "SELECT AVG(total_amount) AS average_amount FROM orders WHERE DATE(order_date) = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setDate(1, date);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    averageAmount = resultSet.getDouble("average_amount");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return averageAmount;
+    }
+
+    @Override
+    public double maxOrderAmountByDate(Date date) {
+        double maxAmount = -1;
+        String query = "SELECT MAX(total_amount) AS max_amount FROM orders WHERE order_date = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setDate(1, date);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    maxAmount = resultSet.getDouble("max_amount");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return maxAmount;
+    }
+
+
+
 
 }

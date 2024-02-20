@@ -124,4 +124,46 @@ public class ScheduleDaoImpl implements ScheduleDao {
         return schedules;
     }
 
+    @Override
+    public List<Schedule> findScheduleForBaristaByWeek(int staffId) {
+        List<Schedule> schedules = new ArrayList<>();
+        String query = "SELECT * FROM schedule WHERE staff_id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, staffId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Schedule schedule = new Schedule();
+                    schedule.setId(resultSet.getInt("id"));
+                    schedule.setStaffId(resultSet.getInt("staff_id"));
+                    schedule.setDayOfWeek(resultSet.getString("day_of_week"));
+                    schedule.setStartTime(resultSet.getTime("start_time"));
+                    schedule.setEndTime(resultSet.getTime("end_time"));
+                    schedules.add(schedule);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return schedules;
+    }
+
+    @Override
+    public List<Schedule> findScheduleForWeek() {
+        List<Schedule> schedules = new ArrayList<>();
+        String query = "SELECT * FROM staff WHERE position_id = 1";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                int staffId = resultSet.getInt("id");
+                List<Schedule> staffSchedules = findScheduleForBaristaByWeek(staffId);
+                schedules.addAll(staffSchedules);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return schedules;
+    }
+
+
+
 }

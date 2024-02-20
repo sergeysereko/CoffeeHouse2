@@ -2,10 +2,7 @@ package org.example.dao.orderItemDAO;
 
 import org.example.model.OrderItem;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -165,6 +162,41 @@ public class OrderItemDaoImpl implements OrderItemDao {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int countDessertOrdersByDate(Date date) {
+        int dessertOrdersCount = 0;
+        String query = "SELECT COUNT(*) AS count FROM orderitems WHERE item_type = 'dessert' AND CAST(order_id AS VARCHAR) IN (SELECT CAST(id AS VARCHAR) FROM orders WHERE DATE(order_date) = ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setDate(1, date);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    dessertOrdersCount = resultSet.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return dessertOrdersCount;
+    }
+
+
+    @Override
+    public int countBeverageOrdersByDate(Date date) {
+        int beverageOrdersCount = 0;
+        String query = "SELECT COUNT(*) AS count FROM orderitems WHERE item_type = 'drink' AND CAST(order_id AS VARCHAR) IN (SELECT CAST(id AS VARCHAR) FROM orders WHERE DATE(order_date) = ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setDate(1, date);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    beverageOrdersCount = resultSet.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return beverageOrdersCount;
     }
 
 }
